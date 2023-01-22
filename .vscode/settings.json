@@ -1,0 +1,11 @@
+{
+	"files.associations": {
+		"*.html": "django-html"
+	},
+	"python.pythonPath": "C:\\Users\\Guest user\\AppData\\Local\\Programs\\Python\\Python37-32\\python.exe",
+	"python.formatting.provider": "autopep8",
+	"python.analysis.extraPaths": [
+		"./apps"
+	],
+	"python.analysis.typeCheckingMode": "off"
+}

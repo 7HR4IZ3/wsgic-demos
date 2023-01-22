@@ -1,0 +1,16 @@
+{% set randint = load("random:randint") %}
+{% set id = randint(0, 1000000) %}
+
+<textarea id="ckeditor{{ id }}" name="{{ attrs.name }}">
+	{{ attrs.value or '' }}
+</textarea>
+
+<script>
+	ClassicEditor.create( document.querySelector( '#ckeditor{{ id }}' ), JSON.parse("{{ editorconfig }}"))
+	.then( editor => {
+		window.editor = editor;
+	} )
+	.catch( err => {
+		console.error( err.stack );
+	} );
+</script>

@@ -1,0 +1,40 @@
+{
+    "_tables": {
+        "Books": {
+            "_values": [],
+            "_columns": {
+                "id": "id",
+                "title": "title",
+                "rating": "rating"
+            }
+        }
+    },
+    "_schema": {
+        "Books": {
+            "id": {
+                "type": "integer",
+                "default": null,
+                "max_length": null,
+                "primary_key": true,
+                "unique": false,
+                "null": false
+            },
+            "title": {
+                "type": "text",
+                "default": null,
+                "max_length": 50,
+                "primary_key": false,
+                "unique": false,
+                "null": false
+            },
+            "rating": {
+                "type": "integer",
+                "default": 1,
+                "max_length": null,
+                "primary_key": false,
+                "unique": false,
+                "null": false
+            }
+        }
+    }
+}
