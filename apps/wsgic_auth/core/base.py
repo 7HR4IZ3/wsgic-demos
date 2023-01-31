@@ -123,7 +123,7 @@ class AuthenticationBase:
         * @return array|object|None
         """
         session = sessions.session
-        return request.get_cookie("wsgic_auth.username", session.get('auth.username', None), secret="wsgic_auth_cookie_secret")
+        return request.get_cookie("wsgic_auth.username", default=session.get('auth.username', None), secret="wsgic_auth_cookie_secret")
 
     #____________________________________________________________________
     # Model Setters
