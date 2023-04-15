@@ -1,8 +1,7 @@
 from wsgic.handlers.files import FileSystemStorage
-from wsgic.helpers import get_global
+from pathlib import Path
 
-appdir = FileSystemStorage(directory=get_global("appsdir"))[__package__]
-
+appdir = FileSystemStorage(directory=str(Path(__file__).parent.absolute()))
 
 class Dict:
     __data = {}

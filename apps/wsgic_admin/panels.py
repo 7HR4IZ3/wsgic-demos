@@ -180,7 +180,7 @@ class ActivityPanel(AdminPanel):
 
 class UserPanel(AdminPanel):
     model = User
-    list_columns=["id", "username", "email_addr", "desc", "image"]
+    list_columns=["id", "username", "email_addr", "desc"]
     create_columns = ["username", "desc", "email_addr", "password"]
     delete_columns = ["username"]
     skip = ["hash"]
@@ -191,8 +191,6 @@ class UserPanel(AdminPanel):
     password.setup(model.db, model)
 
     def apply_data(self, column, instance):
-        if column == "image":
-            return instance.image.url
         return instance[column]
     
     def apply_value(self, column, data):

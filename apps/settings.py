@@ -50,9 +50,7 @@ STATIC = {
         "DIRS": [
             BASE_DIR / "templates/",
             BASE_DIR / "{app_name}/template/",
-            BASE_DIR / "apps/{app_name}/template/",
-            BASE_DIR / "apps/{app_name}/templates/",
-            BASE_DIR / "apps/{app_name}/template/src",
+            BASE_DIR / "{app_name}/templates/",
         ],
         "CONFIG": {
             # "block_start_string": BLOCK_START_STRING,

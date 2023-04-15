@@ -10,8 +10,8 @@ from wsgic.handlers.files import FileSystemStorage
 def error(e):
     raise e
 
-store = FileSystemStorage(directory="./media").create()
-uploads = store["uploads"].create()
+# store = FileSystemStorage(directory="./media").create()
+# uploads = store["uploads"].create()
 
 class Role(database.Model):
     role: str = SelectColumn(options=["admin", "editor", "user", "superuser"])
@@ -28,7 +28,7 @@ class User(database.Model):
     email_addr: str = EmailColumn(label="Email Address", helper_text="User's email address: '@' must be present", unique=True)
     desc: str = RichTextColumn(label="Description", helper_text="Description of the user")
     creation_date: datetime = DateTimeColumn(null=False)
-    image: str = ImageColumn(extensions=["jpg", "png"], store=uploads, default="default.png", label="Image")
+    # image: str = ImageColumn(extensions=["jpg", "png"], store=uploads, default="default.png", label="Image")
     last_login: datetime = DateTimeColumn()
     hash: bytes = BytesColumn(null=False)
 

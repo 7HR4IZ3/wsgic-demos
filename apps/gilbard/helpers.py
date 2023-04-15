@@ -1,6 +1,6 @@
 from wsgic.database.sqlite import SqliteDatabase
 from wsgic.handlers.files import FileSystemStorage
-from wsgic.helpers import get_global
+from pathlib import Path
 
 database = SqliteDatabase("./db.sqlite", check_same_thread=False)
 
@@ -8,5 +8,5 @@ database = SqliteDatabase("./db.sqlite", check_same_thread=False)
 def error(e):
 	raise e
 
-appdir = FileSystemStorage(directory=get_global("appsdir"))[__package__]
+appdir = FileSystemStorage(directory=str(Path(__file__).parent.absolute()))
 media = appdir["media"].create()

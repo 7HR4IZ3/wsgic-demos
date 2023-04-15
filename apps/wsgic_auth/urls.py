@@ -1,10 +1,10 @@
 # from wsgic.backend.cap import anonymous, roles
-from wsgic.routing import Routes, Router
+# from wsgic.routing import Routes, Router
 # from wsgic.backend.bottle import static_file
 # from .views import AuthView#,login, blogin, dlogin# MainView, AdminView
 
-routes = Routes("{", "}", "::")
-router = Router()
+# routes = Routes(start="{", end="}", sep="::")
+# router = Router()
 
 # # with routes.use(MainView()) as routes:
 # # 	routes.get("/", "index", name="auth-index"),
@@ -38,4 +38,4 @@ router = Router()
 
 # # routes.add("/baslogin", login)
 
-router.routes = routes
+# router.routes = routes

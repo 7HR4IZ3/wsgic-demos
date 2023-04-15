@@ -106,7 +106,7 @@ DATABASES = {
 }
 
 DATABASE = {
-    "PATH": "sqlite://database.sqlite",
+    "PATH": "sqlite://./database.sqlite",
     "DEBUG": DEBUG,
     "VERBOSE": DEBUG,
     "CONFIG": {

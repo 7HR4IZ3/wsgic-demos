@@ -15,7 +15,6 @@ class CreateMixin(BaseMixin):
         ret = self.get_object(**data)
         return self.respondCreated(ret.serialize())
 
-
 class ListMixin(BaseMixin):
     """
     List a queryset.
@@ -24,7 +23,6 @@ class ListMixin(BaseMixin):
         data = self.get_object(**kwargs)
         data = data.serialize()
         return self.respond(data or {})
-
 
 class RetrieveMixin(BaseMixin):
     """
@@ -35,7 +33,6 @@ class RetrieveMixin(BaseMixin):
         if x:
             return self.respond(x.serialize())
         return self.failNotFound("No %s with id: %s"%(self.model.__table_name__(), kwargs["id"]))
-
 
 class UpdateMixin(BaseMixin):
     """
@@ -61,7 +58,6 @@ class UpdateMixin(BaseMixin):
     def get_serializer(self, instance, **kw):
         return instance
 
-
 class DestroyMixin(BaseMixin):
     """
     Destroy a model instance.
@@ -72,7 +68,7 @@ class DestroyMixin(BaseMixin):
             self.perform_destroy(instance)
             return self.respondDeleted({})
         return self.failResourceGone()
-    
+
     def perform_destroy(self, instance):
         self.model.objects.delete(**instance.serialize())
 

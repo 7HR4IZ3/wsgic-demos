@@ -5,7 +5,7 @@ from wsgic.views.templates import Jinja2Template
 from wsgic.helpers import config
 from wsgic.session import sessions
 from wsgic.services import service
-from wsgic_auth.helpers import (login_required, check, authentication, authorization)
+from wsgic_auth.decorators import (login_required, check, authentication, authorization)
 from wsgic.services.validation import Validator
 # from wsgic_auth.core import JWTAuth
 
@@ -34,7 +34,7 @@ class AuthenticationView(BaseView):
                 # messages.add("Login or create an account")
                 # if authentication.logged_in():
                 #     return redirect().route("admin_index")
-                return render("admin/authentication-login.html")
+                return render("admin/auth-login.html")
             else:
 
                 validation.set_rules(validation_rules)
@@ -54,7 +54,7 @@ class AuthenticationView(BaseView):
 
                     return redirect().back().error(*errors)
 
-                return redirect().route(request.next or request.previous_url or "admin_index").message("Logged in successfully as {request.user.username}.") if authentication.login(username, password, remember) else redirect().route("admin_login").error("Log in failed.")
+                return redirect().route(request.next or "admin_index").message("Logged in successfully as {request.user.username}.") if authentication.login(username, password, remember) else redirect().route("admin_login").error("Log in failed.")
         else:
             # redirect(route("login")))
             return redirect().route(request.next or 'admin_index')
@@ -69,7 +69,7 @@ class AuthenticationView(BaseView):
     def register(self):
         """Send out registration email"""
         if request.method == 'GET':
-            return render('admin/authentication-register.html')
+            return render('admin/auth-register.html')
         authentication.register(request.POST.get('username'), request.POST.get('password'), request.POST.get('email_address'))
         return redirect().route(config.get('register_redirect', 'admin_login')).message('Check your email to complete registration.')
 
@@ -81,7 +81,7 @@ class AuthenticationView(BaseView):
     def send_password_reset_email(self):
         """Send out password reset email"""
         if request.method == 'GET':
-            return render('admin/authentication-forgot-password.html')
+            return render('admin/auth-forgot-password.html')
         authentication.send_password_reset_email(
             username=request.POST.get('username'),
             email_addr=request.POST.get('email')

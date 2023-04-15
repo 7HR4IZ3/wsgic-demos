@@ -6,3 +6,4 @@ class Wsgic_ApiApp(WSGIApp):
         super().__init__("wsgic_api.urls:router", config)
 
 __app__ = Wsgic_ApiApp()
+__app__.setup()

@@ -1,8 +1,6 @@
 from wsgic.routing import Router
 from wsgic.helpers import config
 
-from wsgic_auth.models import uploads, store
-
 from .views import *
 from .helpers import appdir
 
@@ -38,5 +36,5 @@ with routes.use(AuthenticationView()), routes.group('auth')  as routes:
     routes.get("change_password", "change_password", name="admin_change_pass")
     routes.get("change_password/{code::int}", "change_password_validate", name="admin_change_pass_validate")
 
-routes.static("/media", store, name="adminmedia")
+# routes.static("/media", store, name="adminmedia")
 routes.static("/assets", appdir["assets"], name="adminstatic")

@@ -8,14 +8,12 @@ assets = appdir["assets"]
 
 router, routes = Router().get_routes()
 
+routes.view("/auth", AuthView, name="auth")
+routes.view("/", HomeView, methods="GET")
+
+routes.mount("/admin", AdminApp)
+
 routes.static("/static", assets, name="static")
 routes.static("/media", media)
 
-routes.get("<locale>/translate/<name>", locale_test)
-routes.add("*", index, methods="GET")
-
-with routes.group("auth"):
-    routes.add("/login", login, name="login")
-    routes.get("logout", logout, name="logout")
-
-routes.mount("/admin", AdminApp)
+print(routes.data)

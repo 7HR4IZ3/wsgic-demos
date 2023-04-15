@@ -12,85 +12,84 @@ import os, uuid
 class AuthenticationBase:
     UserModel = BaseUser
 
-    def login(self, user = None, remember = False):
+    def __init__(self, key=None):
+        self.key = key or "wsgic_auth.username"
+
+    def login(self, user=None, remember=False):
         """
-        * Logs a user into the system.
-        * NOT: does not perform validation. All validation should
-        * be done prior to using the login method.
+        Logs a user into the system.
+        NOT: does not perform validation. All validation should
+        be done prior to using the login method.
         *
-        * @param User user
+        @param User user
         *
-        * @throws Exception
+        @throws Exception
         """
         raise NotImplemented
 
     def is_logged_in(self):
         """
-        * Checks to see if the user is logged in.
+        Checks to see if the user is logged in.
         """
         return self.retrieve_username() is not None
 
     def logout(self):
         """
-        * Logs a user out of the system.
+        Logs a user out of the system.
         """
         raise NotImplemented
 
 
     def record_login_attempt(self, email, ipAddress, username, success):
         """
-        * Record a login attempt
+        Record a login attempt
         *
-        * @return bool|int|string
+        @return bool|int|string
         """
         raise NotImplemented
 
     def remember_user(self, username, session=True):
         """
-        * Generates a timing_attack safe remember me token
-        * and stores the necessary info in the db and a cookie.
+        Generates a timing_attack safe remember me token
+        and stores the necessary info in the db and a cookie.
         *
-        * @see http:#paragonie.com/blog/2015/04/secure_authentication_php_with_long_term_persistence
+        @see http:#paragonie.com/blog/2015/04/secure_authentication_php_with_long_term_persistence
         *
-        * @throws Exception
+        @throws Exception
         """
         """Setup cookie for a user that just logged in"""
 
         if session:
             sess = sessions.session
-            sess['auth.username'] = username
-            if self.session_domain is not None:
-                sess.domain = self.session_domain
+            sess[self.key] = username
             sessions.save()
-            print("Using session")
         else:
-            response.set_cookie("wsgic_auth.username", username, secret="wsgic_auth_cookie_secret", path="/")
-            print("Setting cookie")
+            response.set_cookie(self.key, username, secret="wsgic_auth_cookie_secret", path="/")
     
     def forget_user(self):
         """
         Forget the current user
-        * Deletes cookie or session containing the current user's id
+        Deletes cookie or session containing the current user's id
         """
-        response.delete_cookie("wsgic_auth.username", path="/")
-        if sessions.session.get("auth.username", None):
-            sessions.session.pop("auth.username", None)
+        response.delete_cookie(self.key, path="/")
+        if sessions.session.get(self.key, None):
+            sessions.session.pop(self.key, None)
             sessions.save()
         return True
 
     def refresh_remember(self, username, selector):
         """
-        * Sets a new validator for self user/selector. self allows
-        * a one_time use of remember_me tokens, but still allows
-        * a user to be remembered on multiple browsers/devices.
+        Sets a new validator for self user/selector. self allows
+        a one_time use of remember_me tokens, but still allows
+        a user to be remembered on multiple browsers/devices.
         """
         raise NotImplemented
 
     def id(self):
         """
-        * Returns the User ID for the current logged in user.
+        Returns the User ID for the current logged in user.
         *
-        * @return int|None
+        @return int|None
         """
         if self.is_logged_in():
             return self.user.id
@@ -98,9 +97,9 @@ class AuthenticationBase:
 
     def user(self, username=None):
         """
-        * Returns the User instance for the current logged in user.
+        Returns the User instance for the current logged in user.
         *
-        * @return User|None
+        @return User|None
         """
         session = sessions.session
         if username:
@@ -118,9 +117,9 @@ class AuthenticationBase:
 
     def retrieve_username(self):
         """
-        * Grabs the current user from the cookie or session.
+        Grabs the current user from the cookie or session.
         *
-        * @return array|object|None
+        @return array|object|None
         """
         session = sessions.session
         return request.get_cookie("wsgic_auth.username", default=session.get('auth.username', None), secret="wsgic_auth_cookie_secret")
@@ -131,10 +130,10 @@ class AuthenticationBase:
 
     def set_user_model(self, model):
         """
-        * Sets the model that should be used to work with
-        * user accounts.
+        Sets the model that should be used to work with
+        user accounts.
         *
-        * @return self
+        @return self
         """
         self.UserModel = model
         return self

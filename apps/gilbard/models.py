@@ -1,5 +1,4 @@
 from wsgic.database.columns import *
-from wsgic.database.sqlite import SqliteDatabase
 from wsgic.thirdparty.bottle import cached_property
 from wsgic_auth.models import User
 
@@ -9,7 +8,6 @@ images = media["images"].create()
 
 class Tag(db.Model):
     pass
-
 
 class Rating(db.Model):
     item_id: int = ForeignKeyColumn(Tag, null=False)
@@ -58,7 +56,7 @@ class Game(db.Model):
     # def ratings_avg(self):
     #     return sum([self.ratings_count[x] for x in self.ratings_count]) / len(self.ratings)
     
-    @cached_property
+    @property
     def reviews(self):
         return Review.objects.get(game_id=self.id)
     

@@ -1,7 +1,21 @@
-from wsgic.views import BaseView
+import inspect
+import json
+
+from wsgic.views import BaseView, FunctionView, render, partial
+from wsgic.views.templates import Jinja2Template
+from wsgic.routing import Router, Route, _url
+from wsgic.handlers.files import FileSystemStorage
 from wsgic.http import JsonResponse, XmlResponse, request, response
+from wsgic.helpers import makelist
+from wsgic.thirdparty.swagger import swagger
+from pathlib import Path
+
 
 from .mixins import *
+
+render = partial(render, engine=Jinja2Template)
+
+appdir = FileSystemStorage(directory=Path(__file__).parent.as_uri().replace("file:///", ""))
 
 class ApiTrait:
     response_codes = {
@@ -101,6 +115,54 @@ class ApiTrait:
 
 class ApiView(ApiTrait, BaseView, CreateMixin, UpdateMixin, DestroyMixin, RetrieveMixin, AuthenticationMixin):
     def index(self):
+        print("index...")
         data = self.model.objects.all()
         data = data.serialize()
+        print("Serializing:", data)
         return self.respond(data or {})
+
+class SwaggerView:
+    router: Router = None
+
+    def __init__(self, router=None, *args, **kwargs):
+        self.router = self.router or router
+
+    def setup_routes(self, router, config):
+        self.url = _url(config["rule"]+"/spec")
+        self.assets_url = _url(config["rule"]+"/swagger_assets")
+
+        self.router = self.router or router
+        self.routes = self.router.get_routes()[1]
+        self.routes.static(self.assets_url, store=appdir["templates"]["swagger"])
+        self.routes.add(self.url, self.generate_spec)
+        self.routes.add(config["rule"], self.index)
+
+    def index(self):
+        context = {
+            "open_api_spec": self.url,
+            "assets_url": self.assets_url
+        }
+        return render("swagger/index.html", context)
+    
+    def generate_spec(self):
+        return JsonResponse(swagger(self.router))
+    
+    def generate_path_specs(self):
+        route: Route
+        specs = {}
+
+        for route in self.routes.data:
+            gen = self.generate_route_spec(route)
+            if gen:
+                gen = {**specs.get(route.rule, {}), **gen}
+                specs[route.rule.replace("<", "{").replace(">", "}")] = gen
+        return specs
+    
+    def generate_route_spec(self, route: Route):
+        spec = {}
+        docs = json.loads(inspect.getdoc(route.callback) or route.config.get("api_spec", "{}"))
+        for method in makelist(route.method):
+            if docs.get(method.lower()):
+                method_spec = docs.get(method.lower(), {})
+                spec[method.lower()] = method_spec
+        return spec

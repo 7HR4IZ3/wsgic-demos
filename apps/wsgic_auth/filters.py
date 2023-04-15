@@ -1,5 +1,5 @@
 from wsgic.helpers.filters import Filter
-from .helpers import auth
+from .decorators import auth
 
 class AuthFilter(Filter):
 	def logged_in():

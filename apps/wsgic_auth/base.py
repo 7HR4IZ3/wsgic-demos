@@ -1,203 +1,205 @@
 
 class Authentication(object):
-	"""Abstract class"""
+    """Abstract class"""
 
-	def login(self, username, password, success=None,
-			  fail=None):
-		pass
+    def login(self, username, password, success=None,
+              fail=None):
+        pass
 
-	def logout(self, fail=None, success=None):
-		pass
+    def logout(self, fail=None, success=None):
+        pass
 
-	def login_required(self, username=None, role=None, fixed_role=False, fail=None):
-		pass
+    def login_required(self, username=None, role=None, fixed_role=False, fail=None):
+        pass
 
-	def create_role(self, role, level):
-	    pass
+    def create_role(self, role, level):
+        pass
 
-	def delete_role(self, role):
-	    pass
+    def delete_role(self, role):
+        pass
 
-	def list_roles(self):
-		pass
+    def list_roles(self):
+        pass
 
-	def create_user(self, username, role, password, email_addr=None, description=None):
-		pass
+    def create_user(self, username, role, password, email_addr=None, description=None):
+        pass
 
-	def delete_user(self, username):
-	    pass
+    def delete_user(self, username):
+        pass
 
-	def list_users(self):
-	    pass
-	
-	@property
-	def current_user(self):
-		pass
+    def list_users(self):
+        pass
 
-	@property
-	def user_is_anonymous(self):
-		pass
+    @property
+    def current_user(self):
+        pass
 
-	def user(self, username=None):
-		pass
+    @property
+    def user_is_anonymous(self):
+        pass
 
-	def register(self, username, password, email_addr, role='user', success=None, fail=None):
-		pass
+    def user(self, username=None):
+        pass
 
-	def validate_registration(self, registration_code):
-	    pass
+    def register(self, username, password, email_addr, role='user', success=None, fail=None):
+        pass
 
-	def send_password_reset_email(self, username=None, email_addr=None, subject="Password reset confirmation", email_template='views/password_reset_email', **kwargs):
-		pass
-		
-	def reset_password(self, reset_code, password):
-		pass
+    def validate_registration(self, registration_code):
+        pass
 
-	def role(self, role, fail=None):
-		def wrap(func):
-			try:
-				cu = self.current_user
-				if self.db.role[cu.role].level < self.db.role[role].level:
-					raise AAAException("User Not Qualified To Access This Page")
-			except:
-				# if fail is None and self.fail is None:
-					# raise AuthException("Unauthenticated user")
-				# else:
-				if fail:fail()
-			return func
-		return wrap
+    def send_password_reset_email(self, username=None, email_addr=None, subject="Password reset confirmation", email_template='views/password_reset_email', **kwargs):
+        pass
 
+    def reset_password(self, reset_code, password):
+        pass
 
-	## Private methods
-	def _setup_cookie(self, username):
-		"""Setup cookie for a user that just logged in"""
-		session = self._session
-		session['username'] = username
-		if self.session_domain is not None:
-			session.domain = self.session_domain
+    def role(self, role, fail=None):
+        def wrap(func):
+            try:
+                cu = self.current_user
+                if self.db.role[cu.role].level < self.db.role[role].level:
+                    raise AAAException(
+                        "User Not Qualified To Access This Page")
+            except:
+                # if fail is None and self.fail is None:
+                    # raise AuthException("Unauthenticated user")
+                # else:
+                if fail:
+                    fail()
+            return func
+        return wrap
 
-		self._save_session()
+    # Private methods
 
-	def _hash(self, username, pwd, salt=None, algo=None):
-		"""Hash username and password, generating salt value if required
-		"""
-		if algo is None:
-			algo = self.preferred_hashing_algorithm
+    def _setup_cookie(self, username):
+        """Setup cookie for a user that just logged in"""
+        session = self._session
+        session['username'] = username
+        if self.session_domain is not None:
+            session.domain = self.session_domain
 
-		if algo == 'PBKDF2':
-			return self._hash_pbkdf2(username, pwd, salt=salt)
+        self._save_session()
 
-		if algo == 'scrypt':
-			return self._hash_scrypt(username, pwd, salt=salt)
+    def _hash(self, username, pwd, salt=None, algo=None):
+        """Hash username and password, generating salt value if required
+        """
+        if algo is None:
+            algo = self.preferred_hashing_algorithm
 
-		raise RuntimeError("Unknown hashing algorithm requested: %s" % algo)
+        if algo == 'PBKDF2':
+            return self._hash_pbkdf2(username, pwd, salt=salt)
 
-	@staticmethod
-	def _hash_scrypt(username, pwd, salt=None):
-		"""Hash username and password, generating salt value if required
-		Use scrypt.
+        if algo == 'scrypt':
+            return self._hash_scrypt(username, pwd, salt=salt)
 
-		:returns: base-64 encoded str.
-		"""
-		if not scrypt_available:
-			raise Exception("scrypt.hash required."
-							" Please install the scrypt library.")
+        raise RuntimeError("Unknown hashing algorithm requested: %s" % algo)
 
-		if salt is None:
-			salt = os.urandom(32)
+    @staticmethod
+    def _hash_scrypt(username, pwd, salt=None):
+        """Hash username and password, generating salt value if required
+        Use scrypt.
 
-		assert len(salt) == 32, "Incorrect salt length"
+        :returns: base-64 encoded str.
+        """
+        if not scrypt_available:
+            raise Exception("scrypt.hash required."
+                            " Please install the scrypt library.")
 
-		cleartext = "%s\0%s" % (username, pwd)
-		h = scrypt.hash(cleartext, salt)
+        if salt is None:
+            salt = os.urandom(32)
 
-		# 's' for scrypt
-		hashed = b's' + salt + h
-		return b64encode(hashed)
+        assert len(salt) == 32, "Incorrect salt length"
 
-	@staticmethod
-	def _hash_pbkdf2(username, pwd, salt=None):
-		"""Hash username and password, generating salt value if required
-		Use PBKDF2 from Beaker
+        cleartext = "%s\0%s" % (username, pwd)
+        h = scrypt.hash(cleartext, salt)
 
-		:returns: base-64 encoded str.
-		"""
-		if salt is None:
-			salt = os.urandom(32)
+        # 's' for scrypt
+        hashed = b's' + salt + h
+        return b64encode(hashed)
 
-		assert isinstance(salt, bytes)
-		assert len(salt) == 32, "Incorrect salt length"
+    @staticmethod
+    def _hash_pbkdf2(username, pwd, salt=None):
+        """Hash username and password, generating salt value if required
+        Use PBKDF2 from Beaker
 
-		username = username.encode('utf-8')
-		assert isinstance(username, bytes)
+        :returns: base-64 encoded str.
+        """
+        if salt is None:
+            salt = os.urandom(32)
 
-		pwd = pwd.encode('utf-8')
-		assert isinstance(pwd, bytes)
+        assert isinstance(salt, bytes)
+        assert len(salt) == 32, "Incorrect salt length"
 
-		cleartext = username + b'\0' + pwd
-		h = hashlib.pbkdf2_hmac('sha1', cleartext, salt, 10, dklen=32)
+        username = username.encode('utf-8')
+        assert isinstance(username, bytes)
 
-		# 'p' for PBKDF2
-		hashed = b'p' + salt + h
-		return b64encode(hashed)
+        pwd = pwd.encode('utf-8')
+        assert isinstance(pwd, bytes)
 
-	def _verify_password(self, username, pwd, salted_hash):
-		"""Verity username/password pair against a salted hash
+        cleartext = username + b'\0' + pwd
+        h = hashlib.pbkdf2_hmac('sha1', cleartext, salt, 10, dklen=32)
 
-		:returns: bool
-		"""
-		assert isinstance(salted_hash, type(b''))
-		decoded = b64decode(salted_hash)
-		hash_type = decoded[0]
-		if isinstance(hash_type, int):
-			hash_type = chr(hash_type)
+        # 'p' for PBKDF2
+        hashed = b'p' + salt + h
+        return b64encode(hashed)
 
-		salt = decoded[1:33]
+    def _verify_password(self, username, pwd, salted_hash):
+        """Verity username/password pair against a salted hash
 
-		if hash_type == 'p':  # PBKDF2
-			h = self._hash_pbkdf2(username, pwd, salt)
-			return salted_hash == h
+        :returns: bool
+        """
+        assert isinstance(salted_hash, type(b''))
+        decoded = b64decode(salted_hash)
+        hash_type = decoded[0]
+        if isinstance(hash_type, int):
+            hash_type = chr(hash_type)
 
-		if hash_type == 's':  # scrypt
-			h = self._hash_scrypt(username, pwd, salt)
-			return salted_hash == h
+        salt = decoded[1:33]
 
-		raise RuntimeError("Unknown hashing algorithm in hash: %r" % decoded)
+        if hash_type == 'p':  # PBKDF2
+            h = self._hash_pbkdf2(username, pwd, salt)
+            return salted_hash == h
 
-	def _purge_expired_registrations(self, exp_time=96):
-		"""Purge expired registration requests.
+        if hash_type == 's':  # scrypt
+            h = self._hash_scrypt(username, pwd, salt)
+            return salted_hash == h
 
-		:param exp_time: expiration time (hours)
-		:type exp_time: float.
-		"""
-		pending = self.db.pending_registrations.items()
-		if is_py3:
-			pending = list(pending)
+        raise RuntimeError("Unknown hashing algorithm in hash: %r" % decoded)
 
-		for uuid_code, data in pending:
-			creation = datetime.strptime(data['creation_date'],
-										 "%Y-%m-%d %H:%M:%S.%f")
-			now = datetime.utcnow()
-			maxdelta = timedelta(hours=exp_time)
-			if now - creation > maxdelta:
-				self.db.pending_registrations.pop(uuid_code)
+    def _purge_expired_registrations(self, exp_time=96):
+        """Purge expired registration requests.
 
-	def _reset_code(self, username, email_addr):
-		"""generate a reset_code token
+        :param exp_time: expiration time (hours)
+        :type exp_time: float.
+        """
+        pending = self.db.pending_registrations.items()
+        if is_py3:
+            pending = list(pending)
 
-		:param username: username
-		:type username: str.
-		:param email_addr: email address
-		:type email_addr: str.
-		:returns: Base-64 encoded token
-		"""
-		h = self._hash(username, email_addr)
-		t = "%d" % time()
-		t = t.encode('utf-8')
-		reset_code = b':'.join((username.encode('utf-8'),
-								email_addr.encode('utf-8'), t, h))
-		return b64encode(reset_code)
+        for uuid_code, data in pending:
+            creation = datetime.strptime(data['creation_date'],
+                                         "%Y-%m-%d %H:%M:%S.%f")
+            now = datetime.utcnow()
+            maxdelta = timedelta(hours=exp_time)
+            if now - creation > maxdelta:
+                self.db.pending_registrations.pop(uuid_code)
+
+    def _reset_code(self, username, email_addr):
+        """generate a reset_code token
+
+        :param username: username
+        :type username: str.
+        :param email_addr: email address
+        :type email_addr: str.
+        :returns: Base-64 encoded token
+        """
+        h = self._hash(username, email_addr)
+        t = "%d" % time()
+        t = t.encode('utf-8')
+        reset_code = b':'.join((username.encode('utf-8'),
+                                email_addr.encode('utf-8'), t, h))
+        return b64encode(reset_code)
 
 
 class Authorization:
-	pass
+    pass

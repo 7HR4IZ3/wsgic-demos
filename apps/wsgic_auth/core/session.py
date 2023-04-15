@@ -14,18 +14,18 @@ import hashlib
 import os
 import uuid
 
-try:
-    import scrypt
-    scrypt_available = True
-except ImportError:  # pragma: no cover
-    scrypt_available = False
+# try:
+#     import scrypt
+#     scrypt_available = True
+# except ImportError:  # pragma: no cover
+scrypt_available = False
 
 authorizer: Authorization = service("authorization")
 
 class SessionAuth(AuthenticationBase):
     """Abstract class"""
 
-    def __init__(self, email_sender=None, session_domain=None, smtp_server=None, smtp_url='localhost', template_renderer=render):
+    def __init__(self, key=None):
         """Auth/Authorization/Accounting class
 
         :param directory: configuration directory
@@ -35,13 +35,9 @@ class SessionAuth(AuthenticationBase):
         :param roles_fname: roles filename (without .json), defaults to 'roles'
         :type roles_fname: str.
         """
-        if smtp_server:
-            smtp_url = smtp_server
-        self.mailer = Mailer(email_sender, smtp_url)
+        super().__init__(key)
         self.password_reset_timeout = 3600 * 24
-        self.session_domain = session_domain
         self.preferred_hashing_algorithm = 'PBKDF2'
-        self.template = template_renderer
 
     def login(self, username, password, remember=True):
         """Check login credentials for an existing user.
@@ -354,21 +350,21 @@ class SessionAuth(AuthenticationBase):
 
         :returns: base-64 encoded str.
         """
-        if not scrypt_available:
-            raise Exception("scrypt.hash required."
-                            " Please install the scrypt library.")
+        # if not scrypt_available:
+        #     raise Exception("scrypt.hash required."
+        #                     " Please install the scrypt library.")
 
-        if salt is None:
-            salt = os.urandom(32)
+        # if salt is None:
+        #     salt = os.urandom(32)
 
-        assert len(salt) == 32, "Incorrect salt length"
+        # assert len(salt) == 32, "Incorrect salt length"
 
-        cleartext = "%s\0%s" % (username, pwd)
-        h = scrypt.hash(cleartext, salt)
+        # cleartext = "%s\0%s" % (username, pwd)
+        # h = scrypt.hash(cleartext, salt)
 
-        # 's' for scrypt
-        hashed = b's' + salt + h
-        return b64encode(hashed)
+        # # 's' for scrypt
+        # hashed = b's' + salt + h
+        # return b64encode(hashed)
 
     @staticmethod
     def _hash_pbkdf2(username, pwd, salt=None):
